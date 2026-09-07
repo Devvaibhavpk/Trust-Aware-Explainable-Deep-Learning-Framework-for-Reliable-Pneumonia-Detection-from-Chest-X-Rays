@@ -1,0 +1,7 @@
+# Place Chest X-Ray Pneumonia dataset here:
+# data/train/NORMAL/
+# data/train/PNEUMONIA/
+# data/val/NORMAL/
+# data/val/PNEUMONIA/
+# data/test/NORMAL/
+# data/test/PNEUMONIA/

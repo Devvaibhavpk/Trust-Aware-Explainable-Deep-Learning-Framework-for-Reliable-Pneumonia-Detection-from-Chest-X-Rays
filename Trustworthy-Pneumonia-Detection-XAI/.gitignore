@@ -1,0 +1,58 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data artifacts (keep data/README.md tracked)
+/data/train/
+/data/val/
+/data/test/
+/data/raw/
+/data/processed/
+/data/sample/
+
+# Model checkpoints and weights
+checkpoints/
+checkpoints_densenet/
+*.pth
+*.pt
+*.onnx
+*.h5
+*.ckpt
+
+# Generated outputs
+outputs/figures/
+outputs/predictions/
+outputs/logs/
+outputs/reports/
+outputs/*.png
+outputs/*.jpg
+outputs/*.csv
+
+# Archives and large files
+*.zip
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Cursor
+.cursor/

@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+title: Trustworthy Deep Learning System for Chest X-ray Pneumonia Detection using Explainable AI
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: "Research Team"
+    affiliation: "Trustworthy Deep Learning Research Project"
+version: 1.0.0
+date-released: 2026-08-05
+license: MIT
+repository-code: "https://github.com/your-org/chest-xray-trustworthy-dl"
+keywords:
+  - chest x-ray
+  - pneumonia detection
+  - explainable AI
+  - Grad-CAM
+  - temperature scaling
+  - trustworthy AI
+  - deep learning
+abstract: >
+  A calibrated and explainable deep learning framework for binary chest X-ray
+  classification (Normal vs Pneumonia) combining CNN classifiers, post-hoc
+  temperature scaling, Grad-CAM explainability, Monte Carlo Dropout uncertainty
+  estimation, and trust-aware analysis for clinical decision support research.
