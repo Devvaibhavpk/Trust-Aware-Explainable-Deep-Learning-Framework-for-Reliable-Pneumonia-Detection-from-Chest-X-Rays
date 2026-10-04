@@ -1,16 +1,17 @@
 """
 CNN-based models for chest X-ray binary classification.
-Supports: Custom CNN, ResNet18, VGG16.
+Supports: Custom CNN, ResNet18, VGG16, DenseNet121, EfficientNet-B0.
 Binary classification via single output + sigmoid or two outputs + softmax.
 """
 
 import torch
 import torch.nn as nn
 from torchvision import models
-from typing import Optional, Literal
+from typing import Literal
 
 ModelType = Literal["custom", "resnet18", "vgg16", "densenet121", "efficientnet_b0"]
 NUM_CLASSES = 2  # NORMAL, PNEUMONIA
+DEFAULT_DROPOUT = 0.5
 
 
 
@@ -69,14 +70,17 @@ class ChestXRayCNN(nn.Module):
         raise RuntimeError("No Conv2d found in features")
 
 
-def get_resnet18(pretrained: bool = True, num_classes: int = 1) -> nn.Module:
+def get_resnet18(pretrained: bool = True, num_classes: int = 1, dropout_p: float = DEFAULT_DROPOUT) -> nn.Module:
     """
     ResNet18 for binary classification.
-    Single output + sigmoid: num_classes=1. Optionally 2 outputs + softmax: num_classes=2.
+    Dropout is added before the final linear layer so Monte Carlo Dropout can estimate uncertainty.
     """
     model = models.resnet18(weights=models.ResNet18_Weights.IMAGENET1K_V1 if pretrained else None)
     in_features = model.fc.in_features
-    model.fc = nn.Linear(in_features, num_classes if num_classes > 1 else 1)
+    model.fc = nn.Sequential(
+        nn.Dropout(p=dropout_p),
+        nn.Linear(in_features, num_classes if num_classes > 1 else 1),
+    )
     return model
 
 
@@ -91,16 +95,19 @@ def get_vgg16(pretrained: bool = True, num_classes: int = 1) -> nn.Module:
     return model
 
 
-def get_densenet121(pretrained: bool = True, num_classes: int = 1) -> nn.Module:
+def get_densenet121(pretrained: bool = True, num_classes: int = 1, dropout_p: float = DEFAULT_DROPOUT) -> nn.Module:
     """
     DenseNet121 for binary classification.
-    Replaces classifier with a single logit (or num_classes outputs).
+    Dropout is added before the classifier so Monte Carlo Dropout can estimate uncertainty.
     """
     model = models.densenet121(
         weights=models.DenseNet121_Weights.IMAGENET1K_V1 if pretrained else None
     )
     in_features = model.classifier.in_features
-    model.classifier = nn.Linear(in_features, num_classes if num_classes > 1 else 1)
+    model.classifier = nn.Sequential(
+        nn.Dropout(p=dropout_p),
+        nn.Linear(in_features, num_classes if num_classes > 1 else 1),
+    )
     return model
 
 
@@ -148,7 +155,10 @@ def get_last_conv_layer_for_model(model: nn.Module, model_type: ModelType) -> nn
     if model_type == "resnet18":
         return model.layer4[-1].conv2
     if model_type == "vgg16":
-        return model.features[-1]  # last conv in VGG features
+        for module in reversed(list(model.features.modules())):
+            if isinstance(module, nn.Conv2d):
+                return module
+        raise RuntimeError("No Conv2d found in VGG16 features")
     if model_type == "densenet121":
         # Last dense block's last conv layer
         return model.features.denseblock4.denselayer16.conv2

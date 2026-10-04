@@ -7,7 +7,7 @@ authors:
 version: 1.0.0
 date-released: 2026-08-05
 license: MIT
-repository-code: "https://github.com/your-org/chest-xray-trustworthy-dl"
+repository-code: "https://github.com/HARIKRISHNA39/Trustworthy-Pneumonia-Detection-XAI"
 keywords:
   - chest x-ray
   - pneumonia detection

@@ -35,6 +35,7 @@ Histogram of TrustScore values across the test set (requires `--trust_eval` flag
 ## Reproducing Results
 
 ```bash
+python scripts/prepare_dataset.py path/to/chest_xray --val_ratio 0.15
 python -m training.train --model_type resnet18 --epochs 15
 python -m evaluation.calibrate
 python -m evaluation.evaluate --trust_eval

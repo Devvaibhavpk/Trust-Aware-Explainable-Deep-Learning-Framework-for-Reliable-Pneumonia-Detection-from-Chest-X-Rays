@@ -3,12 +3,23 @@ DataLoader factory for train/validation/test splits.
 """
 
 from pathlib import Path
-from typing import Tuple
+from typing import Optional, Tuple
 
-from torch.utils.data import DataLoader
+import torch
+from torch.utils.data import DataLoader, Subset
 
 from datasets.dataset import ChestXRayDataset
 from datasets.transforms import get_transforms
+
+
+def _maybe_subset(dataset, max_samples: Optional[int], seed: int = 42):
+    """Optionally cap a dataset size for quick faculty demos."""
+    if max_samples is None or max_samples <= 0 or len(dataset) <= max_samples:
+        return dataset
+    generator = torch.Generator()
+    generator.manual_seed(seed)
+    indices = torch.randperm(len(dataset), generator=generator)[:max_samples].tolist()
+    return Subset(dataset, indices)
 
 
 def get_dataloaders(
@@ -18,6 +29,8 @@ def get_dataloaders(
     num_workers: int = 0,
     use_imagenet_norm: bool = True,
     pin_memory: bool = True,
+    max_samples: Optional[int] = None,
+    seed: int = 42,
 ) -> Tuple[DataLoader, DataLoader, DataLoader]:
     """
     Build train, validation, and test DataLoaders.
@@ -29,6 +42,8 @@ def get_dataloaders(
         num_workers: DataLoader worker count.
         use_imagenet_norm: Use ImageNet normalization statistics.
         pin_memory: Enable pinned memory for GPU transfer.
+        max_samples: Optional cap on images per split (useful for a quick demo).
+        seed: RNG seed used when subsampling.
 
     Returns:
         Tuple of (train_loader, val_loader, test_loader).
@@ -46,14 +61,9 @@ def get_dataloaders(
         root=str(data_path / "test"),
         transform=get_transforms("test", image_size, use_imagenet_norm),
     )
-
-    if len(train_ds) == 0:
-        raise ValueError(
-            "No training data found. Expected directory structure:\n"
-            f"  {data_path / 'train'}/NORMAL/  and  {data_path / 'train'}/PNEUMONIA/\n"
-            "with .jpg, .jpeg, or .png images. Download the Chest X-Ray Pneumonia dataset "
-            "from Kaggle and place train/val/test folders under the data/ directory."
-        )
+    train_ds = _maybe_subset(train_ds, max_samples, seed)
+    val_ds = _maybe_subset(val_ds, max_samples, seed)
+    test_ds = _maybe_subset(test_ds, max_samples, seed)
 
     train_loader = DataLoader(
         train_ds,

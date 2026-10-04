@@ -25,10 +25,10 @@ data/
 2. Split the original training folder into train/val:
 
    ```bash
-   python scripts/prepare_dataset.py path/to/chest_xray/train --val_ratio 0.15
+   python scripts/prepare_dataset.py path/to/chest_xray --val_ratio 0.15
    ```
 
-3. Copy or symlink the resulting folders into `data/train`, `data/val`, and copy the Kaggle test set to `data/test`.
+   This copies a disjoint train/val split into `data/train` and `data/val`, and copies the Kaggle test set into `data/test`.
 
 ## Notes
 

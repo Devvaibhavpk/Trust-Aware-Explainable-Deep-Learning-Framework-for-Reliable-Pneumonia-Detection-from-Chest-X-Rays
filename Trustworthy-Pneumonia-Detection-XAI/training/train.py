@@ -36,6 +36,7 @@ from configs.config import (
 from datasets.preprocessing import get_dataloaders
 from models.cnn_model import build_model
 from training.trainer import evaluate_epoch, train_one_epoch
+from utils.seed import set_seed
 
 matplotlib.use("Agg")
 
@@ -54,7 +55,27 @@ def main() -> None:
     parser.add_argument("--batch_size", type=int, default=BATCH_SIZE)
     parser.add_argument("--lr", type=float, default=LEARNING_RATE)
     parser.add_argument("--save_dir", type=str, default=str(MODEL_SAVE_DIR))
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument(
+        "--max_samples",
+        type=int,
+        default=None,
+        help="Cap images per split for a quick demo (leave unset for the full dataset).",
+    )
+    parser.add_argument(
+        "--quick",
+        action="store_true",
+        help="Faculty-demo preset: 2 epochs and 128 images per split.",
+    )
     args = parser.parse_args()
+
+    if args.quick:
+        if args.epochs == NUM_EPOCHS:
+            args.epochs = 2
+        if args.max_samples is None:
+            args.max_samples = 128
+
+    set_seed(args.seed)
 
     ensure_dirs()
 
@@ -67,11 +88,16 @@ def main() -> None:
         batch_size=args.batch_size,
         num_workers=NUM_WORKERS,
         pin_memory=(device.type == "cuda"),
+        max_samples=args.max_samples,
+        seed=args.seed,
     )
 
     if len(train_loader.dataset) == 0:
         print("No training data found. Place data in data/train/NORMAL and data/train/PNEUMONIA")
         return
+
+    if len(val_loader.dataset) == 0:
+        print("Warning: no validation images found. The best checkpoint will use training accuracy.")
 
     model = build_model(model_type=args.model_type, pretrained=True, num_classes=1)
     model = model.to(device)
@@ -101,8 +127,8 @@ def main() -> None:
             f"Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}"
         )
 
-        if val_acc > best_val_acc:
-            best_val_acc = val_acc
+        if val_acc > best_val_acc or (len(val_loader.dataset) == 0 and train_acc > best_val_acc):
+            best_val_acc = val_acc if len(val_loader.dataset) > 0 else train_acc
             save_path = save_dir_path / MODEL_WEIGHTS_NAME
             torch.save(
                 {"model_state_dict": model.state_dict(), "model_type": args.model_type},

@@ -7,63 +7,101 @@ import shutil
 from pathlib import Path
 
 
+IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png"}
+CLASS_NAMES = ["NORMAL", "PNEUMONIA"]
+
+
+def _class_dir(root: Path, class_name: str) -> Path | None:
+    for candidate in (root / class_name, root / class_name.lower()):
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def _list_images(class_dir: Path) -> list[Path]:
+    return [
+        path
+        for path in class_dir.iterdir()
+        if path.is_file() and path.suffix.lower() in IMAGE_SUFFIXES
+    ]
+
+
+def _copy_files(files: list[Path], dest_dir: Path) -> int:
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    copied = 0
+    for src in files:
+        dest = dest_dir / src.name
+        shutil.copy2(src, dest)
+        copied += 1
+    return copied
+
+
+def split_kaggle_dataset(
+    source_root: Path,
+    dest_root: Path,
+    val_ratio: float = 0.15,
+    seed: int = 42,
+) -> None:
+    """
+    Copy the Kaggle chest-xray layout into dest_root without train/val leakage.
+
+    Accepts either:
+      - the Kaggle root (contains train/, test/, optional val/)
+      - the Kaggle train folder (contains NORMAL/ and PNEUMONIA/)
+    """
+    source_root = source_root.resolve()
+    dest_root = dest_root.resolve()
+    random.seed(seed)
+
+    train_src = source_root / "train"
+    if _class_dir(source_root, "NORMAL") is not None:
+        train_src = source_root
+        test_src = source_root.parent / "test"
+    else:
+        test_src = source_root / "test"
+
+    if _class_dir(train_src, "NORMAL") is None and _class_dir(train_src, "PNEUMONIA") is None:
+        raise FileNotFoundError(
+            f"Could not find NORMAL/PNEUMONIA folders under {train_src}. "
+            "Pass the Kaggle chest_xray directory or its train folder."
+        )
+
+    train_dest = dest_root / "train"
+    val_dest = dest_root / "val"
+    test_dest = dest_root / "test"
+
+    for class_name in CLASS_NAMES:
+        class_dir = _class_dir(train_src, class_name)
+        if class_dir is None:
+            print(f"Skip (not found): {class_name}")
+            continue
+
+        images = _list_images(class_dir)
+        random.shuffle(images)
+        n_val = max(1, int(len(images) * val_ratio)) if images else 0
+        val_files = images[:n_val]
+        train_files = images[n_val:]
+
+        n_train = _copy_files(train_files, train_dest / class_name)
+        n_copied_val = _copy_files(val_files, val_dest / class_name)
+        print(f"{class_name}: train={n_train}, val={n_copied_val}")
+
+        test_class = _class_dir(test_src, class_name) if test_src.exists() else None
+        if test_class is not None:
+            n_test = _copy_files(_list_images(test_class), test_dest / class_name)
+            print(f"{class_name}: test={n_test}")
+
+    print(f"Dataset prepared at {dest_root}")
+
+
 def split_folder(
     src_dir: Path,
     train_ratio: float = 0.85,
     val_ratio: float = 0.15,
     seed: int = 42,
+    dest_root: Path | None = None,
 ) -> None:
-    """
-    Split a folder with NORMAL/PNEUMONIA subdirs into train and val sets.
-
-    Args:
-        src_dir: Source directory containing class subfolders.
-        train_ratio: Fraction of images assigned to training.
-        val_ratio: Fraction of images assigned to validation.
-        seed: Random seed for reproducible splits.
-    """
-    random.seed(seed)
-    parent = src_dir.parent
-    train_dir = parent / "train"
-    val_dir = parent / "val"
-    train_dir.mkdir(parents=True, exist_ok=True)
-    val_dir.mkdir(parents=True, exist_ok=True)
-
-    for class_name in ["NORMAL", "PNEUMONIA"]:
-        class_dir = src_dir / class_name
-        if not class_dir.exists():
-            class_dir = src_dir / class_name.lower()
-        if not class_dir.exists():
-            print(f"Skip (not found): {class_dir}")
-            continue
-
-        images = [
-            f for f in class_dir.glob("*.*")
-            if f.suffix.lower() in (".jpg", ".jpeg", ".png")
-        ]
-        random.shuffle(images)
-        n_val = max(1, int(len(images) * val_ratio))
-        n_train = len(images) - n_val
-        train_list = images[:n_train]
-        val_list = images[n_train:]
-
-        (train_dir / class_name).mkdir(parents=True, exist_ok=True)
-        (val_dir / class_name).mkdir(parents=True, exist_ok=True)
-
-        for f in train_list:
-            dest = train_dir / class_name / f.name
-            if not dest.exists() or dest.resolve() != f.resolve():
-                try:
-                    shutil.copy2(f, dest)
-                except OSError as exc:
-                    print(f"Copy failed {f} -> {dest}: {exc}")
-
-        for f in val_list:
-            dest = val_dir / class_name / f.name
-            if not dest.exists() or dest.resolve() != f.resolve():
-                try:
-                    shutil.copy2(f, dest)
-                except OSError as exc:
-                    print(f"Copy failed {f} -> {dest}: {exc}")
-
-        print(f"{class_name}: train={len(train_list)}, val={len(val_list)}")
+    """Backward-compatible wrapper around split_kaggle_dataset()."""
+    del train_ratio
+    project_data = Path(__file__).resolve().parent.parent / "data"
+    split_kaggle_dataset(src_dir, dest_root or project_data, val_ratio=val_ratio, seed=seed)

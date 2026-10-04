@@ -80,6 +80,7 @@ def main() -> None:
 
     model, model_type, calibrator = load_model_and_calibrator(device, args.save_dir)
     target_layer = get_last_conv_layer_for_model(model, model_type)
+    gradcam = GradCAM(model, target_layer) if args.trust_eval else None
 
     all_preds, all_labels, all_raw_probs, all_cal_probs = [], [], [], []
     focus_scores, trust_scores, ood_flags = [], [], []
@@ -88,11 +89,11 @@ def main() -> None:
         segmenter = LungSegmenter.from_checkpoint(checkpoint_path=None, device=device)
         trust_engine = TrustEngine()
 
-    with torch.no_grad():
-        for images, labels, _ in test_loader:
-            images = images.to(device)
-            labels_np_batch = labels.numpy()
+    for images, labels, _ in test_loader:
+        images = images.to(device)
+        labels_np_batch = labels.numpy()
 
+        with torch.no_grad():
             logits = model(images).squeeze(-1)
             raw_probs_batch = torch.sigmoid(logits).cpu().numpy()
 
@@ -106,46 +107,44 @@ def main() -> None:
             else:
                 cal_probs_batch = raw_probs_batch
 
-            preds_batch = (raw_probs_batch >= 0.5).astype(int)
+        preds_batch = (raw_probs_batch >= 0.5).astype(int)
 
-            all_preds.extend(preds_batch.tolist())
-            all_labels.extend(labels_np_batch.tolist())
-            all_raw_probs.extend(raw_probs_batch.tolist())
-            cal_list = cal_probs_batch.tolist()
-            all_cal_probs.extend(cal_list)
+        all_preds.extend(preds_batch.tolist())
+        all_labels.extend(labels_np_batch.tolist())
+        all_raw_probs.extend(raw_probs_batch.tolist())
+        cal_list = cal_probs_batch.tolist()
+        all_cal_probs.extend(cal_list)
 
-            if args.trust_eval:
-                for i in range(images.size(0)):
-                    img = images[i : i + 1]
-                    cal_prob = float(cal_list[i])
+        if args.trust_eval:
+            for i in range(images.size(0)):
+                img = images[i : i + 1]
+                cal_prob = float(cal_list[i])
 
-                    mc_res = predict_with_uncertainty(
-                        model, img, n_samples=args.n_mc_samples, device=device
-                    )
-                    mean_pred = mc_res["mean_prediction"]
-                    variance = mc_res["variance"]
+                mc_res = predict_with_uncertainty(
+                    model, img, n_samples=args.n_mc_samples, device=device
+                )
+                mean_pred = mc_res["mean_prediction"]
+                variance = mc_res["variance"]
 
-                    pred_class = int(preds_batch[i])
-                    gradcam = GradCAM(model, target_layer)
-                    with torch.enable_grad():
-                        heatmap = gradcam.generate(img, target_class=pred_class)
+                pred_class = int(preds_batch[i])
+                heatmap = gradcam.generate(img, target_class=pred_class)
 
-                    lung_mask_tensor = segmenter.segment(img)
-                    lung_mask_np = tensor_mask_to_numpy(lung_mask_tensor)
-                    focus = focus_overlap_score(heatmap, lung_mask_np, heatmap_threshold=0.4)
+                lung_mask_tensor = segmenter.segment(img)
+                lung_mask_np = tensor_mask_to_numpy(lung_mask_tensor)
+                focus = focus_overlap_score(heatmap, lung_mask_np, heatmap_threshold=0.4)
 
-                    _, agreement_score = agreement_from_probabilities([mean_pred], threshold=0.5)
+                _, agreement_score = agreement_from_probabilities([mean_pred], threshold=0.5)
 
-                    trust_summary = trust_engine.summarize(
-                        calibrated_confidence=cal_prob,
-                        focus_score=focus,
-                        uncertainty=variance,
-                        agreement_score=agreement_score,
-                    )
+                trust_summary = trust_engine.summarize(
+                    calibrated_confidence=cal_prob,
+                    focus_score=focus,
+                    uncertainty=variance,
+                    agreement_score=agreement_score,
+                )
 
-                    focus_scores.append(focus)
-                    trust_scores.append(trust_summary["trust_score"])
-                    ood_flags.append(trust_summary["ood_flag"])
+                focus_scores.append(focus)
+                trust_scores.append(trust_summary["trust_score"])
+                ood_flags.append(trust_summary["ood_flag"])
 
     y_true = np.array(all_labels)
     y_pred = np.array(all_preds)

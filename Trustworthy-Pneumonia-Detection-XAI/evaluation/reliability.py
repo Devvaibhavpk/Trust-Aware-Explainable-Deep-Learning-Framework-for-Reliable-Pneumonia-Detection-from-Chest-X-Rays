@@ -71,7 +71,8 @@ def reliability_diagram(
     bin_confs_arr = np.array(bin_confs)
     ece = compute_ece(probs, labels, n_bins)
 
-    if ax is None:
+    created_figure = ax is None
+    if created_figure:
         fig, ax = plt.subplots(1, 1, figsize=(5, 5))
     else:
         fig = ax.figure if hasattr(ax, "figure") else None
@@ -95,12 +96,14 @@ def reliability_diagram(
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
     ax.set_aspect("equal")
-    plt.tight_layout()
+    if created_figure:
+        plt.tight_layout()
 
     if path:
         plt.savefig(path, dpi=150, bbox_inches="tight")
-        plt.close()
-    elif fig is not None:
+        if created_figure:
+            plt.close(fig)
+    elif created_figure and fig is not None:
         plt.close(fig)
 
     return ece, bin_accs_arr, bin_confs_arr

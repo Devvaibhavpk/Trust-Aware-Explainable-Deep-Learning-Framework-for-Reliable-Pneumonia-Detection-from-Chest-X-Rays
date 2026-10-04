@@ -19,6 +19,9 @@ def train_one_epoch(
     correct = 0
     total = 0
 
+    if len(loader) == 0:
+        return 0.0, 0.0
+
     for images, labels, _ in loader:
         images = images.to(device)
         labels = labels.to(device).float().unsqueeze(1)
@@ -56,6 +59,9 @@ def evaluate_epoch(
     running_loss = 0.0
     correct = 0
     total = 0
+
+    if len(loader) == 0:
+        return 0.0, 0.0
 
     for images, labels, _ in loader:
         images = images.to(device)

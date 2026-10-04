@@ -60,7 +60,8 @@ class GradCAM:
         output = self.model(input_tensor)
         if target_class is None:
             if output.size(-1) == 1:
-                target_class = 1 if output.item() >= 0.5 else 0
+                prob = torch.sigmoid(output.squeeze()).item()
+                target_class = 1 if prob >= 0.5 else 0
             else:
                 target_class = output.argmax(dim=-1).item()
 

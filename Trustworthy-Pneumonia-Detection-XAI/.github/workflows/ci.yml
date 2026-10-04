@@ -38,3 +38,4 @@ jobs:
           python -m evaluation.evaluate --help
           python -m inference.predict --help
           python scripts/prepare_dataset.py --help
+          python scripts/demo.py --help

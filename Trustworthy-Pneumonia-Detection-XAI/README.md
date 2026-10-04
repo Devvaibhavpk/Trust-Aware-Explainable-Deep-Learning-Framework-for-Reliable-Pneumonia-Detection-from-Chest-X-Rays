@@ -2,7 +2,9 @@
 
 [![CI](https://github.com/HARIKRISHNA39/Trustworthy-Pneumonia-Detection-XAI/actions/workflows/ci.yml/badge.svg)]
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-A research-grade, production-quality Python framework for **binary chest X-ray classification** (Normal vs Pneumonia) with **probability calibration**, **Grad-CAM explainability**, **Monte Carlo Dropout uncertainty**, and **trust-aware analysis**.
+A research-grade Python framework for **binary chest X-ray classification** (Normal vs Pneumonia) with **probability calibration**, **Grad-CAM explainability**, **Monte Carlo Dropout uncertainty**, and **trust-aware analysis**.
+
+**Showing this to faculty?** Start with [DEMO.md](DEMO.md). Slide talking points are in [Presentation.md](Presentation.md).
 
 ---
 
@@ -65,6 +67,9 @@ See [docs/architecture.md](docs/architecture.md) for the full component diagram.
 ```bash
 git clone https://github.com/HARIKRISHNA39/Trustworthy-Pneumonia-Detection-XAI
 cd Trustworthy-Pneumonia-Detection-XAI
+python -m venv .venv
+# Windows PowerShell: .\.venv\Scripts\Activate.ps1
+# macOS/Linux:        source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -82,8 +87,20 @@ data/
 Split train/val from the Kaggle training folder:
 
 ```bash
-python scripts/prepare_dataset.py path/to/chest_xray/train --val_ratio 0.15
+python scripts/prepare_dataset.py path/to/chest_xray --val_ratio 0.15
 ```
+
+Pass the unzipped Kaggle `chest_xray` root (or its `train` folder). Images are copied into this repo's `data/` directory, with **no overlap** between train and validation.
+
+---
+
+## Faculty demo (Windows)
+
+```powershell
+python scripts/demo.py --quick
+```
+
+That trains a small model, calibrates it, evaluates, and opens a 4-panel inference figure. For the full research run use 15 epochs as below. Details: [DEMO.md](DEMO.md).
 
 See [data/README.md](data/README.md) for details.
 
@@ -93,10 +110,10 @@ See [data/README.md](data/README.md) for details.
 
 ```bash
 python -m training.train --model_type resnet18 --epochs 15
+# quick CPU preview
+python -m training.train --quick
 # or
 python train.py --model_type resnet18 --epochs 15
-# or
-bash scripts/train.sh --model_type resnet18 --epochs 15
 ```
 
 Saves the best model to `checkpoints/chestxray_best.pt` and training curves to `outputs/training_curves.png`.
@@ -196,7 +213,7 @@ If you use this project in your research, please cite:
   author  = {Trustworthy Deep Learning Research Team},
   year    = {2026},
   license = {MIT},
-  url     = {https://github.com/your-org/chest-xray-trustworthy-dl}
+  url     = {https://github.com/HARIKRISHNA39/Trustworthy-Pneumonia-Detection-XAI}
 }
 ```
 

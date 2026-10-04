@@ -67,20 +67,6 @@ def compute_trust_score_with_uncertainty(
     return float(np.clip(trust_score, 0, 1)), focus_score
 
 
-def compute_trust_score_with_uncertainty(
-    calibrated_confidence: float,
-    heatmap: np.ndarray,
-    uncertainty: float,
-    center_ratio: float = 0.5,
-) -> Tuple[float, float]:
-    """Uncertainty-aware trust score: Confidence × Focus × (1 − Uncertainty)."""
-    focus_score = heatmap_focus_score(heatmap, center_ratio)
-    confidence_component = max(calibrated_confidence, 1.0 - calibrated_confidence)
-    uncertainty_clamped = float(np.clip(uncertainty, 0.0, 1.0))
-    trust_score = confidence_component * focus_score * (1.0 - uncertainty_clamped)
-    return float(np.clip(trust_score, 0, 1)), focus_score
-
-
 def get_trust_level(
     trust_score: float,
     calibrated_confidence: float,

@@ -19,17 +19,14 @@ from configs.config import (
     CALIBRATOR_NAME,
     DATA_DIR,
     IMAGE_SIZE,
-    MODEL_CONFIG_NAME,
     MODEL_SAVE_DIR,
-    MODEL_WEIGHTS_NAME,
     NUM_WORKERS,
     OUTPUT_DIR,
     ensure_dirs,
 )
 from datasets.preprocessing import get_dataloaders
-from evaluation.calibration import TemperatureScaling, fit_temperature
+from evaluation.calibration import fit_temperature
 from evaluation.reliability import compute_ece, reliability_diagram
-from models.cnn_model import build_model
 from utils.helpers import configure_matplotlib_backend, show_or_open_figure
 from utils.io import load_model_and_calibrator
 

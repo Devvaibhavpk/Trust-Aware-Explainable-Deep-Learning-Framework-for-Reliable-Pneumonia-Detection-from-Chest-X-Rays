@@ -49,11 +49,27 @@ def configure_matplotlib_backend(prefer_interactive: bool = True) -> None:
 
 
 def show_or_open_figure(output_file: Path) -> None:
-    """Display a figure interactively or open the saved file with the OS viewer."""
+    """Display a figure interactively, or just report the saved path in notebooks/Colab."""
     import matplotlib.pyplot as plt
+
+    in_colab = Path("/content").exists() or "COLAB_RELEASE_TAG" in os.environ
+    in_notebook = False
+    try:
+        from IPython import get_ipython
+
+        in_notebook = get_ipython() is not None
+    except (ImportError, NameError):
+        in_notebook = False
 
     current_backend = matplotlib.get_backend().lower()
     print(f"Matplotlib backend: {matplotlib.get_backend()}")
+
+    in_streamlit = bool(os.environ.get("STREAMLIT_SERVER_PORT") or os.environ.get("STREAMLIT_RUNTIME"))
+
+    if in_colab or in_notebook or in_streamlit:
+        print(f"Figure saved to: {output_file}")
+        print("In Colab: run the display cell below, or open this file in the left Files sidebar.")
+        return
 
     if current_backend != "agg":
         print("Displaying figure...")
