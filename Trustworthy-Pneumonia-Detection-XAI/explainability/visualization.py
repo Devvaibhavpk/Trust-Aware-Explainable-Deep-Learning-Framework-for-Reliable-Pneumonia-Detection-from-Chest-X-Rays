@@ -47,15 +47,15 @@ def plot_summary_panel(ax, result: dict) -> None:
     trust_color = TRUST_COLORS.get(trust_level, "#95a5a6")
 
     lines = [
-        ("INFERENCE SUMMARY", None, 13, "bold"),
-        ("─" * 34, None, 9, "normal"),
-        (f"Predicted class:       {result['predicted_class']}", None, 10, "normal"),
-        (f"Raw confidence:        {result['raw_confidence']:.4f}", None, 10, "normal"),
-        (f"Calibrated confidence: {result['calibrated_confidence']:.4f}", None, 10, "normal"),
-        (f"Uncertainty (variance):{result['uncertainty_score']:.6f}", None, 10, "normal"),
-        (f"Focus score:           {result['focus_score']:.4f}", None, 10, "normal"),
-        (f"Trust score:           {result['trust_score']:.4f}", None, 10, "normal"),
-        ("─" * 34, None, 9, "normal"),
+        ("INFERENCE SUMMARY", "#38bdf8", 12, "bold"),
+        ("─" * 36, "#475569", 9, "normal"),
+        (f"Predicted class:       {result['predicted_class']}", "#f8fafc", 10, "normal"),
+        (f"Raw confidence:        {result['raw_confidence']:.4f}", "#cbd5e1", 10, "normal"),
+        (f"Calibrated confidence: {result['calibrated_confidence']:.4f}", "#cbd5e1", 10, "normal"),
+        (f"Uncertainty (variance):{result['uncertainty_score']:.6f}", "#cbd5e1", 10, "normal"),
+        (f"Focus score:           {result['focus_score']:.4f}", "#cbd5e1", 10, "normal"),
+        (f"Trust score:           {result['trust_score']:.4f}", "#cbd5e1", 10, "normal"),
+        ("─" * 36, "#475569", 9, "normal"),
         (f"Trust level: {trust_level}", trust_color, 12, "bold"),
     ]
 
@@ -68,7 +68,7 @@ def plot_summary_panel(ax, result: dict) -> None:
             transform=ax.transAxes,
             fontsize=size,
             fontweight=weight,
-            color=color or "#2c3e50",
+            color=color or "#cbd5e1",
             va="top",
             family="monospace",
         )

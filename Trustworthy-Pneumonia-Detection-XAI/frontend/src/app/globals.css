@@ -1,0 +1,296 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+:root,
+[data-theme="dark"] {
+  /* PACS Workstation Deep Dark Theme */
+  --bg-deep: #060911;
+  --bg-card: rgba(13, 20, 36, 0.78);
+  --bg-card-hover: rgba(18, 28, 50, 0.88);
+  --border-subtle: rgba(56, 189, 248, 0.12);
+  --border-bright: rgba(56, 189, 248, 0.35);
+
+  --text-main: #f8fafc;
+  --text-dim: #94a3b8;
+  --text-muted: #64748b;
+
+  --accent-cyan: #06b6d4;
+  --accent-cyan-glow: #22d3ee;
+  --accent-blue: #3b82f6;
+  --accent-blue-deep: #1d4ed8;
+  --alert-red: #ef4444;
+  --alert-red-glow: #f87171;
+  --alert-amber: #f59e0b;
+  --status-green: #10b981;
+
+  --shadow-pacs: 0 10px 30px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(6, 182, 212, 0.08);
+  --shadow-glow-cyan: 0 0 25px rgba(34, 211, 238, 0.3);
+  --shadow-glow-red: 0 0 25px rgba(239, 68, 68, 0.4);
+
+  --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+}
+
+[data-theme="light"] {
+  /* High-End Clinical Light Workstation Theme */
+  --bg-deep: #f1f5f9;
+  --bg-card: rgba(255, 255, 255, 0.92);
+  --bg-card-hover: rgba(248, 250, 252, 0.98);
+  --border-subtle: rgba(15, 23, 42, 0.09);
+  --border-bright: rgba(2, 132, 199, 0.35);
+
+  --text-main: #0f172a;
+  --text-dim: #475569;
+  --text-muted: #64748b;
+
+  --accent-cyan: #0284c7;
+  --accent-cyan-glow: #0ea5e9;
+  --accent-blue: #2563eb;
+  --accent-blue-deep: #1d4ed8;
+  --alert-red: #dc2626;
+  --alert-red-glow: #ef4444;
+  --alert-amber: #d97706;
+  --status-green: #059669;
+
+  --shadow-pacs: 0 10px 30px -5px rgba(0, 0, 0, 0.07), 0 0 15px rgba(14, 165, 233, 0.06);
+  --shadow-glow-cyan: 0 0 20px rgba(14, 165, 233, 0.15);
+  --shadow-glow-red: 0 0 20px rgba(239, 68, 68, 0.18);
+
+  --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html, body {
+  min-height: 100vh;
+  width: 100%;
+  font-family: var(--font-main);
+  background-color: var(--bg-deep);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+[data-theme="dark"] body {
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.12) 0%, transparent 60%),
+    radial-gradient(circle at 10% 80%, rgba(37, 99, 235, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 90% 90%, rgba(220, 38, 38, 0.06) 0%, transparent 50%);
+}
+
+[data-theme="light"] body {
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.08) 0%, transparent 60%),
+    radial-gradient(circle at 10% 80%, rgba(37, 99, 235, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 90% 90%, rgba(220, 38, 38, 0.03) 0%, transparent 50%);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.8);
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(14, 165, 233, 0.3);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  background: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+input {
+  font-family: inherit;
+  outline: none;
+  border: none;
+}
+
+/* Custom Dark Workstation Scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(6, 9, 17, 0.8);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.3);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(56, 189, 248, 0.6);
+}
+
+/* Professional PACS Placards */
+.pacs-placard {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-pacs);
+  padding: 1.25rem 1.4rem;
+  position: relative;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.pacs-placard:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-bright);
+  box-shadow: var(--shadow-pacs), 0 0 20px rgba(6, 182, 212, 0.12);
+}
+
+.pacs-placard-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Breathing & Respiration Keyframes */
+@keyframes lungBreathe {
+  0% {
+    transform: scale(0.975);
+    filter: drop-shadow(0 0 35px rgba(6, 182, 212, 0.25));
+  }
+  50% {
+    transform: scale(1.028);
+    filter: drop-shadow(0 0 65px rgba(6, 182, 212, 0.55));
+  }
+  100% {
+    transform: scale(0.975);
+    filter: drop-shadow(0 0 35px rgba(6, 182, 212, 0.25));
+  }
+}
+
+.animate-breathe {
+  animation: lungBreathe 5s ease-in-out infinite;
+}
+
+/* Pulsating Vein Blood Flow */
+@keyframes veinPulse {
+  0% {
+    stroke-dashoffset: 600;
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.95;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.35;
+  }
+}
+
+.animate-vein-flow {
+  animation: veinPulse 3.5s linear infinite;
+}
+
+/* Radar Sweep Keyframe */
+@keyframes radarSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-radar {
+  animation: radarSpin 18s linear infinite;
+}
+
+/* Blood Surge Wave across Screen */
+@keyframes bloodSurge {
+  0% {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+  80% {
+    opacity: 0.95;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+}
+
+.animate-blood-surge {
+  animation: bloodSurge 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Glowing Pulsing Status Dots */
+@keyframes pulseGlowRed {
+  0%, 100% {
+    box-shadow: 0 0 8px #ef4444;
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 20px #ef4444, 0 0 35px #ef4444;
+    transform: scale(1.1);
+  }
+}
+
+.pulse-red {
+  animation: pulseGlowRed 1.8s ease-in-out infinite;
+}
+
+/* Subtle Ambient Wake Shock Keyframes (Gentle & Minimal) */
+@keyframes greenWakePulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.25;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    opacity: 0.12;
+    border-color: rgba(34, 197, 94, 0.15);
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+    box-shadow: none;
+    border-color: transparent;
+  }
+}
+
+.animate-wake-shock-1 {
+  animation: greenWakePulse 5s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+}
+
+.animate-wake-shock-2 {
+  animation: greenWakePulse 5s cubic-bezier(0.1, 0.8, 0.3, 1) infinite 1.6s;
+}
+
+.animate-wake-shock-3 {
+  animation: greenWakePulse 5s cubic-bezier(0.1, 0.8, 0.3, 1) infinite 3.2s;
+}
+
+

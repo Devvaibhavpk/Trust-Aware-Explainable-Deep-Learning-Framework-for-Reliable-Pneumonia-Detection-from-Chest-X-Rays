@@ -45,6 +45,7 @@ outputs/reports/
 outputs/*.png
 outputs/*.jpg
 outputs/*.csv
+outputs/uploads/
 
 # Archives and large files
 *.zip
@@ -56,3 +57,9 @@ desktop.ini
 
 # Cursor
 .cursor/
+
+# Frontend build artifacts (keep source code tracked)
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env*.local
